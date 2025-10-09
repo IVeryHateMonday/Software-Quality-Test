@@ -9,6 +9,13 @@ class Bookstore
 
     public function addBook(string $title, string $author, float $price, int $quantity): void
     {
+        if ($price < 0) {
+            throw new \InvalidArgumentException("Ціна не може бути від’ємною!");
+        }
+        if ($quantity < 0) {
+            throw new \InvalidArgumentException("Кількість не може бути від’ємною!");
+        }
+
         foreach ($this->books as $book) {
             if ($book->title === $title && $book->author === $author) {
                 $book->quantity += $quantity;
@@ -18,13 +25,28 @@ class Bookstore
         $this->books[] = new Book($title, $author, $price, $quantity);
     }
 
-    public function removeBook(string $title, string $author): void
+
+
+    public function removeBook(string $title, string $author, ?int $quantity = null)
     {
-        $this->books = array_filter($this->books, function ($book) use ($title, $author) {
-            return !($book->title === $title && $book->author === $author);
-        });
-        $this->books = array_values($this->books);
+        foreach ($this->books as $index => $book) {
+            if ($book->title === $title && $book->author === $author) {
+                if ($quantity === null || $quantity >= $book->quantity) {
+                    // повне видалення
+                    unset($this->books[$index]);
+                } else {
+                    // зменшення кількості
+                    $book->quantity -= $quantity;
+                }
+                $this->books = array_values($this->books);
+                return true;
+            }
+        }
+        return false;
     }
+
+
+
 
     public function searchBook(string $title): ?Book
     {
