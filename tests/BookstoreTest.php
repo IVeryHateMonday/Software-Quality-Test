@@ -19,7 +19,6 @@ class BookstoreTest extends TestCase
         $this->assertCount(1, $this->store->books);
         $this->assertEquals(5, $this->store->books[0]->quantity);
 
-        // Додавання тієї ж книги має збільшити кількість, а не створити нову
         $this->store->addBook("Book A", "Author A", 10.0, 3);
         $this->assertCount(1, $this->store->books);
         $this->assertEquals(8, $this->store->books[0]->quantity);
