@@ -13,118 +13,112 @@ class BookstoreTest extends TestCase
         $this->store = new Bookstore();
     }
 
-    // ===================== Основні тести =====================
+    // --- Тести додавання книг ---
     public function testAddBook(): void
     {
-        $this->store->addBook("Book A", "Author A", 10.0, 5);
-        $this->assertCount(1, $this->store->books);
-        $this->assertEquals(5, $this->store->books[0]->quantity);
-
-        $this->store->addBook("Book A", "Author A", 10.0, 3);
-        $this->assertCount(1, $this->store->books);
-        $this->assertEquals(8, $this->store->books[0]->quantity);
-
-        $this->store->addBook("Book A", "Author A", 10.0, -3);
-        $this->assertCount(1, $this->store->books);
-        $this->assertEquals(5, $this->store->books[0]->quantity);
-
-        $this->store->addBook("Book A", "Author A", -123, -3);
-        $this->assertCount(1, $this->store->books);
-        $this->assertEquals(2, $this->store->books[0]->quantity);
-
-        $this->store->addBook("Book A", "Author A", 10.0, 3);
-        $this->assertCount(1, $this->store->books);
-        $this->assertEquals(5, $this->store->books[0]->quantity);
-
-        $this->store->addBook("Book A", "Author A", "asdasd", 3);
-        $this->assertCount(1, $this->store->books);
-        $this->assertEquals(8, $this->store->books[0]->quantity);
+        $result = $this->store->addBook('Test','Test',10,2);
+        $this->assertEquals('Ok', $result);
     }
 
+    public function testAddSameBook(): void
+    {
+        $this->store->addBook('Test','Test',10,2);
+        $result = $this->store->addBook('Test','Test',10,3);
+        $this->assertCount(1, $this->store->books);
+        $this->assertEquals(5, $this->store->books[0]->quantity);
+        $this->assertEquals("Ok", $result);
+    }
+
+    public function testAddWrongBookByPrice(): void
+    {
+        $result = $this->store->addBook("Test", "Author", -10, 5);
+        $this->assertEquals("Ціна повинна бути більшою за 0", $result);
+    }
+
+    public function testAddWrongBookByQuantity(): void
+    {
+        $result = $this->store->addBook("Test", "Author", 10, -5);
+        $this->assertEquals("Кількість не може бути від’ємною", $result);
+    }
+
+    public function testAddWrongBookByEmptyTitle(): void
+    {
+        $result = $this->store->addBook("", "Author", 10, 5);
+        $this->assertEquals("Назва або автор не можуть бути порожніми", $result);
+    }
+
+    public function testAddWrongBookByEmptyAuthor(): void
+    {
+        $result = $this->store->addBook("Test", "", 10, 5);
+        $this->assertEquals("Назва або автор не можуть бути порожніми", $result);
+    }
+
+    // --- Тести видалення книг ---
     public function testRemoveBook(): void
     {
-        $this->store->addBook("Book A", "Author A", 10.0, 5);
-        $this->store->removeBook("Book A", "Author A");
-        $this->assertCount(0, $this->store->books);
-
-        $this->store->removeBook("NonExistent", "Author X");
-        $this->assertCount(0, $this->store->books);
+        $this->store->addBook("Test", "Author", 10, 5);
+        $result = $this->store->removeBook("Test", "Author", 10);
+        $this->assertEquals(4, $this->store->books[0]->quantity);
+        $this->assertEquals("Ok", $result);
     }
 
-    public function testSearchBook(): void
+    public function testRemoveBookUntilEmpty(): void
     {
-        $this->store->addBook("Book A", "Author A", 10.0, 5);
-
-        $found = $this->store->searchBook("Book A");
-        $this->assertInstanceOf(Book::class, $found);
-        $this->assertEquals("Author A", $found->author);
-
-        $notFound = $this->store->searchBook("NonExistent");
-        $this->assertNull($notFound);
+        $this->store->addBook("Test", "Author", 10, 1);
+        $result = $this->store->removeBook("Test", "Author", 10);
+        $this->assertCount(0, $this->store->books);
+        $this->assertEquals("Ok", $result);
     }
 
+    public function testRemoveWrongBook(): void
+    {
+        $this->store->addBook("Test", "Author", 10, 5);
+        $result = $this->store->removeBook("Test", "WrongAuthor", 10);
+        $this->assertEquals("Книга не знайдена", $result);
+    }
+
+    // --- Тести покупки книг ---
     public function testPurchaseBook(): void
     {
-        $this->store->addBook("Book A", "Author A", 10.0, 5);
-
-        // Купівля частини книг
-        $total = $this->store->purchaseBook("Book A", 3);
-        $this->assertEquals(30.0, $total);
-        $this->assertEquals(2, $this->store->books[0]->quantity);
-
-        // Купівля більшої кількості, ніж є
-        $this->expectException(Exception::class);
-        $this->expectExceptionMessage("Недостатньо примірників 'Book A'");
-        $this->store->purchaseBook("Book A", 5);
+        $this->store->addBook("Test", "Author", 10, 2);
+        $total = $this->store->purchaseBook("Test", "Author", 10, 2);
+        $this->assertEquals(20, $total);
     }
 
-    public function testInventoryValue(): void
+    public function testPurchaseBookExactQuantity(): void
     {
-        $this->store->addBook("Book A", "Author A", 10.0, 2); // 20
-        $this->store->addBook("Book B", "Author B", 15.0, 3); // 45
-        $this->assertEquals(65.0, $this->store->inventoryValue());
-    }
-
-    // ===================== Edge cases =====================
-    public function testAddBookWithNegativeQuantityOrPrice(): void
-    {
-        // Негативна кількість
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage("Кількість не може бути від’ємною!");
-        $this->store->addBook("Book X", "Author X", 50.0, -5);
-    }
-
-    public function testAddBookWithNegativePrice(): void
-    {
-        // Негативна ціна
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage("Ціна не може бути від’ємною!");
-        $this->store->addBook("Book Y", "Author Y", -10.0, 3);
-    }
-
-    public function testPurchaseBookWithZeroStock(): void
-    {
-        $this->store->addBook("Book A", "Author A", 100.0, 0);
-
-        $this->expectException(\Exception::class);
-        $this->expectExceptionMessage("Недостатньо примірників 'Book A'");
-        $this->store->purchaseBook("Book A", 1);
-    }
-
-    public function testRemoveNonExistingBook(): void
-    {
-        $this->store->removeBook("NonExistent", "Unknown");
+        $this->store->addBook("Test", "Author", 10, 2);
+        $total = $this->store->purchaseBook("Test", "Author", 10, 2);
+        $this->assertEquals(20, $total);
         $this->assertCount(0, $this->store->books);
     }
 
-    public function testSearchBookWithEmptyOrNullTitle(): void
+    public function testPurchaseBookNotEnoughQuantity(): void
     {
-        $this->store->addBook("Book A", "Author A", 20.0, 2);
+        $this->store->addBook("Test", "Author", 10, 1);
+        $result = $this->store->purchaseBook("Test", "Author", 10, 2);
+        $this->assertEquals("Недостатньо примірників", $result);
+    }
 
-        // Порожній рядок
-        $this->assertNull($this->store->searchBook(""));
+    public function testPurchaseBookNotFound(): void
+    {
+        $result = $this->store->purchaseBook("NotExist", "Author", 10, 1);
+        $this->assertEquals("Книга не знайдена", $result);
+    }
 
-        // null приводимо до string
-        $this->assertNull($this->store->searchBook((string)null));
+    // --- Тести пошуку книг ---
+    public function testSearchBookFound(): void
+    {
+        $this->store->addBook("Book1", "Author1", 10, 1);
+        $this->store->addBook("Book2", "Author2", 15, 2);
+        $results = $this->store->searchBook("Book1");
+        $this->assertIsArray($results);
+        $this->assertEquals("Book1", $results[0]->title);
+    }
+
+    public function testSearchBookNotFound(): void
+    {
+        $results = $this->store->searchBook("NotExist");
+        $this->assertEquals("Не знайдено книгу", $results);
     }
 }

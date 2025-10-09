@@ -5,7 +5,8 @@ use Entity\Bookstore;
 use Entity\Book;
 
 $store = new Bookstore();
-
+$store->addBook("test","test",-5,2);
+print_r ($store->books);
 while (true){
     echo "\nКоманди: add, remove, purchase, show, exit: \n";
     $command = readline('Введіть команду: ');
@@ -38,21 +39,28 @@ while (true){
         case 'remove':
             $title = readline("Назва книги: ");
             $author = readline("Автор: ");
-            $store->removeBook($title, $author);
-            echo "Книга видалена!\n";
+            $price= readline("Ціна: ");
+
+            echo $store->removeBook($title, $author,$price);
             break;
 
         case 'purchase':
             $title = readline("Назва книги: ");
-            $quantity = (int) readline("Кількість: ");
-            try {
-                $total = $store->purchaseBook($title, $quantity);
-                echo "Куплено на суму: $total грн\n";
-            } catch (Exception $e) {
-                echo "Помилка: " . $e->getMessage() . "\n";
+            $author = readline("Автор: ");
+            $price= readline("Ціна: ");
+            $quantity = readline("Кількість: ");
+            print_r($store->purchaseBook($title,$author,$price,$quantity));
+            break;
+        case 'search':
+            $title = readline("Назва книги: ");
+            $book = $store->searchBook($title);
+
+            if ($book === "Не знайдено книгу") {
+                echo "Книга не знайдена\n";
+            } else {
+                echo "Назва: " . $book->title . " Автор: " . $book->author . " Ціна: " . $book->price . "\n";
             }
             break;
-
         case 'show':
             $store->showInventory();
             break;
@@ -65,25 +73,3 @@ while (true){
             echo "Невідома команда.\n";
     }
 }
-//$store->addBook("The Great Gatsby", "F. Scott Fitzgerald", 10.99, 5);
-//$store->addBook("Test Book", "Author Test", 18.99, 2);
-//
-//$store->showInventory();
-//
-//$found = $store->searchBook("The Great Gatsby");
-//if ($found) {
-//    echo "\nЗнайдено книгу: {$found->title} — {$found->author} | {$found->price} грн | {$found->quantity} шт.\n";
-//}
-//
-//try {
-//    $cost = $store->purchaseBook("Test Book", 1);
-//    echo "\nВартість покупки: $cost грн\n";
-//} catch (\Exception $e) {
-//    echo "Помилка: " . $e->getMessage() . "\n";
-//}
-//
-//$store->removeBook("The Great Gatsby", "F. Scott Fitzgerald");
-//
-//echo "\nІнвентар після видалення:\n";
-//
-//echo "\nЗагальна вартість інвентарю: " . $store->inventoryValue() . " грн\n";
