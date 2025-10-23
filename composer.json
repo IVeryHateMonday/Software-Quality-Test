@@ -2,7 +2,8 @@
   "name": "admin/pract2php",
   "autoload": {
     "psr-4": {
-      "Entity\\": "Entity/"
+      "Entity\\": "Entity/",
+      "ErrorHandler\\": "ErrorHandler/"
     }
   },
   "authors": [

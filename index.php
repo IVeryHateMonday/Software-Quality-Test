@@ -2,10 +2,10 @@
 require __DIR__ . '/vendor/autoload.php';
 
 use Entity\Bookstore;
-use Entity\Book;
+use ErrorHandler\BookstoreException;
 
 $store = new Bookstore();
-$store->addBook("test","test",-5,2);
+//$store->addBook("test","test",-5,2);
 print_r ($store->books);
 while (true){
     echo "\nКоманди: add, remove, purchase, show, exit: \n";
@@ -16,10 +16,12 @@ while (true){
             $author = readline("Автор: ");
             $price = (float) readline("Ціна: ");
             $quantity = (int) readline("Кількість: ");
+            $ISBN = readline("ISBN: ");
+
             try {
-                $store->addBook($title, $author, $price, $quantity);
+                $store->addBook($title, $author, $price, $quantity, $ISBN);
                 echo "Книга додана!\n";
-            } catch (Exception $e) {
+            } catch (BookstoreException $e) {
                 echo "Помилка: " . $e->getMessage() . "\n";
             }
             break;
@@ -29,11 +31,12 @@ while (true){
             $price = 5;
             $quantity = 3;
             try {
-                $store->addBook($title, $author, $price, $quantity);
-
+                $store->addBook($title, $author, $price, $quantity, $ISBN);
                 echo "Книга додана!\n";
-            } catch (Exception $e) {
+            } catch (BookstoreException $e) {
                 echo "Помилка: " . $e->getMessage() . "\n";
+            } catch (\Exception $e) {
+                echo "Системна помилка: " . $e->getMessage() . "\n";
             }
             break;
         case 'remove':
