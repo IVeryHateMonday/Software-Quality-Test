@@ -11,12 +11,11 @@ class Book
 
     public int $ISBN;
 
-    public function __construct(string $title, string $author, float $price, int $quantity, int $ISBN)
+    public function __construct(string $title, string $author, float $price, int $ISBN)
     {
         $this->title = $title;
         $this->author = $author;
         $this->price = $price;
-        $this->quantity = $quantity;
         $this->ISBN = $ISBN;
     }
 }
