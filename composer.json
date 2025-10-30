@@ -3,7 +3,8 @@
   "autoload": {
     "psr-4": {
       "Entity\\": "Entity/",
-      "ErrorHandler\\": "ErrorHandler/"
+      "ErrorHandler\\": "ErrorHandler/",
+      "Services\\": "Services/"
     }
   },
   "authors": [
